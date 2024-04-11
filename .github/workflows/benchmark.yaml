@@ -1,0 +1,107 @@
+name: Integration tests
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 2 * * *' # 2AM for UTC, 10AM APAC (Hong Kong, Taiwan)
+    - cron: '0 9 * * *' # 9AM UTC, 10AM EU (London)
+    - cron: '0 13 * * *' # 1PM UTC, 10AM AMER (Boston)
+
+jobs:
+  integration-test:
+    name: job job
+    runs-on: [self-hosted, xlarge, linux, X64, jammy]
+    # timeout-minutes: 120
+    steps:
+      ### Network tests
+      - name: Network speed test
+        run: |
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_amd64.tar.gz
+          echo "---network speed test start---"
+          ./librespeed-cli
+          sleep 1
+      - name: Docker image pull speed (pull through cache)
+        run: |
+          echo "---docker image pull speed test start (pull through cache)---"
+          for ((i=0; i<10; i++)); do
+            time docker pull busybox --quiet
+            docker system prune --all -f
+          done
+          sleep 1
+      - name: Docker image pull speed (no pull through cache)
+        run: |
+          echo "---docker image pull speed test start (no cache)---"
+          for ((i=0; i<10; i++)); do
+            time docker pull registry.hub.docker.com/library/busybox --quiet
+            docker system prune --all -f
+          done
+          sleep 1
+      - name: Docker image pull speed (mysql)
+        run: |
+          echo "---docker image pull speed test start (mysql)---"
+          for ((i=0; i<10; i++)); do
+            time docker pull ghcr.io/canonical/charmed-mysql@sha256:5082c99baa7a77c82d73247674e270838dc0a8165c02f7619cf5642d1427cba7 --quiet
+            docker system prune --all -f
+          done
+          sleep 1
+      ### CPU TESTS
+      - name: CPU benchmarks
+        run: |
+          sudo apt-get install sysbench -y
+          echo "---CPU benchmark test start---"
+          sysbench cpu run
+          sleep 1
+      - uses: canonical/setup-lxd@v0.1.1
+      - name: Charmcraft pack speed
+        run: |
+          sudo snap install charmcraft --classic
+          git clone https://github.com/canonical/github-runner-operator.git
+          cd github-runner-operator
+          # First launch
+          echo "First launch"
+          echo "---Charmcraft pack first launch test start---"
+          time sudo charmcraft pack
+          sleep 1
+          # Subsequent launches with cache
+          echo "---Charmcraft pack with cache start---"
+          for ((i=0; i<10; i++)); do
+            time sudo charmcraft pack
+          done
+          sleep 1
+          # Subsequent launches without cache
+          echo "---Charmcraft pack without cache start---"
+          for ((i=0; i<10; i++)); do
+            sudo charmcraft clean
+            time sudo charmcraft pack
+          done
+          sleep 1
+      - name: Postgresql charm deploy speed
+        run: |
+          time sudo snap install juju
+          mkdir -p ~/.local/share/juju
+          time juju bootstrap localhost localhost
+          sleep 1
+          echo "---Postgresql charm deploy speed test start---"
+          for ((i=0; i<10; i++)); do
+            juju add-model test
+            juju deploy postgresql --channel 14/stable
+            time juju wait-for unit postgresql/0 --timeout=15m0s
+            juju destroy-model test --no-prompt --destroy-storage
+          done
+          sleep 1
+        ### DISK TESTS
+      - run: sudo apt-get update  
+      - run: sudo apt install -y fio
+      - name: seq write
+        run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=write --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
+      - run: sudo rm -f /write* /read*
+      - name: rand write
+        run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randwrite --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
+      - run: sudo rm -f /write* /read*
+      - name: seq read
+        run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=read --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
+      - run: sudo rm -f /write* /read*
+      - name: rand read
+        run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randread --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
+      - run: sudo rm -f /write* /read*
