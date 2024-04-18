@@ -7,12 +7,5 @@ jobs:
     name: job job
     runs-on: [self-hosted, ARM64]
     steps:
-      - name: Test echo
-        run: |
-          echo "hello world"
-      - name: docker
-        run: |
-          docker ps
-      - name: python
-        run: |
-          python3 -m pip --version
+      - name: Test jfrog
+        run: curl https://canonical.jfrog.io
