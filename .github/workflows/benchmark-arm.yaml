@@ -88,6 +88,13 @@ jobs:
             juju destroy-model test --no-prompt --destroy-storage
           done
           sleep 1
+      - name: Postgresql charm download speed
+        run: |
+          echo "---Postgresql charm download speed test start---"
+          for ((i=0; i<10; i++)); do
+            time juju download postgresql --channel=14/stable --revision=363
+          done
+          sleep 1
         ### DISK TESTS
       - run: sudo apt-get update  
       - run: sudo apt install -y fio
