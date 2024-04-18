@@ -7,6 +7,8 @@ jobs:
     name: job job
     runs-on: [self-hosted, token-testing]
     steps:
+      - name: Hello
+        run: echo "hello world"
       # Snapd can have some issues in privileged LXD containers without setting
       # security.nesting=True and this.
       - name: Fix snap issue in privileged LXD containers
