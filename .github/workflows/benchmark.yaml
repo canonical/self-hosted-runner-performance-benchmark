@@ -12,6 +12,19 @@ jobs:
     # timeout-minutes: 120
     steps:
       ### Network tests
+      - name: Download indico resource test
+        run : |
+          python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
+          export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
+          export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
+          export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
+          sudo apt-get -y install skopeo
+          sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
+          for ((i=0; i<10; i++)); do
+            time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+          done
+          ls -l
+          sleep 1
       - name: Network speed test
         if: ${{ always() }}
         run: |
@@ -100,7 +113,7 @@ jobs:
         run: |
           echo "---Postgresql charm download speed test start---"
           for ((i=0; i<10; i++)); do
-            time juju download postgresql --channel=14/stable --revision=363
+            time (juju download postgresql --channel "14/stable"; snap download charmed-postgresql  --channel "14/edge")
           done
           sleep 1
         ### DISK TESTS
