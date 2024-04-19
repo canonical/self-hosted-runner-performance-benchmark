@@ -23,8 +23,8 @@ jobs:
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
           for ((i=0; i<10; i++)); do
             time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+            rm -f ./indico_image.tar
           done
-          ls -l
           sleep 1
       - name: Network speed test
         if: ${{ always() }}
