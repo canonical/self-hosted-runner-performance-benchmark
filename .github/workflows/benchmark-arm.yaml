@@ -73,6 +73,7 @@ jobs:
       - name: Charmcraft pack speed
         if: ${{ always() }}
         run: |
+          lxd init --auto
           sudo snap install charmcraft --classic
           git clone https://github.com/canonical/github-runner-operator.git
           cd github-runner-operator
