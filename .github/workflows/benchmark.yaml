@@ -12,6 +12,22 @@ jobs:
     # timeout-minutes: 120
     steps:
       ### Network tests
+      - name: Juju download postgresql test
+        run: |
+          sudo snap install juju
+          mkdir -p ~/.local/share/juju
+          time (juju download postgresql --channel "14/stable"; snap download charmed-postgresql  --channel "14/edge")
+          ls -l 
+      - name: Download indico resource test
+        run : |
+          curl https://canonical-bos01.cdn.snapcraftcontent.com/download-origin/canonical-lgw01/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179?token=1713528000_88f19f5f55e5fe2f62a3068993cef7af05863685 > image_location.json
+          export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
+          export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
+          export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
+          sudo apt-get -y install skopeo
+          sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
+          docker pull $INDICO_IMAGE_NAME
+          rm image_location.json
       - name: Network speed test
         if: ${{ always() }}
         run: |
