@@ -13,6 +13,7 @@ jobs:
     steps:
       ### Network tests
       - name: Network speed test
+        if: ${{ always() }}
         run: |
           wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_arm64.tar.gz
           tar -xvzf librespeed-cli_1.0.10_linux_arm64.tar.gz
@@ -20,6 +21,7 @@ jobs:
           ./librespeed-cli
           sleep 1
       - name: Docker image pull speed (pull through cache)
+        if: ${{ always() }}
         run: |
           echo "---docker image pull speed test start (pull through cache)---"
           for ((i=0; i<10; i++)); do
@@ -28,6 +30,7 @@ jobs:
           done
           sleep 1
       - name: Docker image pull speed (no pull through cache)
+        if: ${{ always() }}
         run: |
           echo "---docker image pull speed test start (no cache)---"
           for ((i=0; i<10; i++)); do
@@ -36,6 +39,7 @@ jobs:
           done
           sleep 1
       - name: Docker image pull speed (mysql)
+        if: ${{ always() }}
         run: |
           echo "---docker image pull speed test start (mysql)---"
           for ((i=0; i<10; i++)); do
@@ -45,6 +49,7 @@ jobs:
           sleep 1
       ### CPU TESTS
       - name: CPU benchmarks
+        if: ${{ always() }}
         run: |
           sudo apt-get install sysbench -y
           echo "---CPU benchmark test start---"
@@ -52,6 +57,7 @@ jobs:
           sleep 1
       - uses: canonical/setup-lxd@v0.1.1
       - name: Charmcraft pack speed
+        if: ${{ always() }}
         run: |
           sudo snap install charmcraft --classic
           git clone https://github.com/canonical/github-runner-operator.git
@@ -75,6 +81,7 @@ jobs:
           done
           sleep 1
       - name: Postgresql charm deploy speed
+        if: ${{ always() }}
         run: |
           time sudo snap install juju
           mkdir -p ~/.local/share/juju
@@ -89,6 +96,7 @@ jobs:
           done
           sleep 1
       - name: Postgresql charm download speed
+        if: ${{ always() }}
         run: |
           echo "---Postgresql charm download speed test start---"
           for ((i=0; i<10; i++)); do
@@ -97,16 +105,26 @@ jobs:
           sleep 1
         ### DISK TESTS
       - run: sudo apt-get update  
+        if: ${{ always() }}
       - run: sudo apt install -y fio
+        if: ${{ always() }}
       - name: seq write
+        if: ${{ always() }}
         run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=write --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
       - run: sudo rm -f /write* /read*
+        if: ${{ always() }}
       - name: rand write
+        if: ${{ always() }}
         run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randwrite --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
       - run: sudo rm -f /write* /read*
+        if: ${{ always() }}
       - name: seq read
+        if: ${{ always() }}
         run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=read --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
       - run: sudo rm -f /write* /read*
+        if: ${{ always() }}
       - name: rand read
+        if: ${{ always() }}
         run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randread --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
       - run: sudo rm -f /write* /read*
+        if: ${{ always() }}
