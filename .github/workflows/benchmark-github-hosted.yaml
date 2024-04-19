@@ -1,4 +1,4 @@
-name: GitHub Hosted
+name: GitHub Hosted benchmark
 
 on:
   schedule:
