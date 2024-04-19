@@ -26,7 +26,7 @@ jobs:
           export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
           sudo apt-get -y install skopeo
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+          time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
           ls -l
       - name: Network speed test
         if: ${{ always() }}
