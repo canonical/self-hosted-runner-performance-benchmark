@@ -1,4 +1,4 @@
-name: Arm benchmark
+name: GitHub Hosted benchmark
 
 on:
   schedule:
@@ -6,9 +6,9 @@ on:
     - cron: '0 * * * *' # Every hour
 
 jobs:
-  arm-benchmarks:
-    name: arm job
-    runs-on: [self-hosted, ARM64]
+  integration-test:
+    name: job job
+    runs-on: ubuntu-latest
     # timeout-minutes: 120
     steps:
       ### Network tests
@@ -29,8 +29,8 @@ jobs:
       - name: Network speed test
         if: ${{ always() }}
         run: |
-          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_arm64.tar.gz
-          tar -xvzf librespeed-cli_1.0.10_linux_arm64.tar.gz
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_amd64.tar.gz
           echo "---network speed test start---"
           ./librespeed-cli
           sleep 1
@@ -70,7 +70,6 @@ jobs:
           sysbench cpu run
           sleep 1
       - uses: canonical/setup-lxd@v0.1.1
-        if: ${{ always() }}
       - name: Charmcraft pack speed
         if: ${{ always() }}
         run: |
