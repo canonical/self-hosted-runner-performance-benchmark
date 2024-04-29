@@ -1,11 +1,11 @@
 name: Test ARM
 
-on: workflow_dispatch
+on: push
 
 jobs:
   test-arm:
     name: job job
-    runs-on: [self-hosted, X64]
+    runs-on: [self-hosted, X64, noble]
     steps:
       - name: Setup tmate session
         uses: canonical/action-tmate@main
