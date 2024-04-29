@@ -3,7 +3,7 @@ name: X64 benchmark
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: '0 * * * *' # Every hour
+    - cron: '0 */6 * * *' # 4 times per day
 
 jobs:
   integration-test:
@@ -23,8 +23,8 @@ jobs:
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
           for ((i=0; i<10; i++)); do
             time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+            rm -f ./indico_image.tar
           done
-          ls -l
           sleep 1
       - name: Network speed test
         if: ${{ always() }}
@@ -74,6 +74,7 @@ jobs:
       - name: Charmcraft pack speed
         if: ${{ always() }}
         run: |
+          lxd init --auto
           sudo snap install charmcraft --classic
           git clone https://github.com/canonical/github-runner-operator.git
           cd github-runner-operator
