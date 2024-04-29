@@ -5,8 +5,7 @@ on: push
 jobs:
   test-arm:
     name: job job
-    runs-on: [self-hosted, X64, noble]
+    runs-on: [self-hosted, xlarge]
     steps:
-      - name: lsb release
-        run: |
-          lsb_release -a
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
