@@ -5,18 +5,7 @@ on: push
 jobs:
   test-arm:
     name: job job
-    runs-on: [self-hosted, noble]
+    runs-on: [self-hosted, xlarge]
     steps:
-      - name: Common
-        run: |
-          lxd init --auto
-          sudo snap install charmcraft --classic
-          git clone https://github.com/canonical/github-runner-operator.git
-          cd github-runner-operator
-          # First launch
-          echo "First launch"
-          echo "---Charmcraft pack first launch test start---"
-          time sudo charmcraft pack
-          sleep 1
       - name: Setup tmate session
         uses: canonical/action-tmate@main
