@@ -106,7 +106,7 @@ jobs:
           echo "---Postgresql charm deploy speed test start---"
           for ((i=0; i<10; i++)); do
             juju add-model test
-            juju deploy postgresql --channel 14/stable
+            juju deploy postgresql --channel 14/stable --constraints="arch=arm64"
             time juju wait-for unit postgresql/0 --timeout=15m0s
             juju destroy-model test --no-prompt --destroy-storage
           done
