@@ -3,7 +3,7 @@ name: Arm benchmark
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: '0 */6 * * *' # 4 times per day
+    - cron: '0 0 */5 * *' # 4 times per day
 
 jobs:
   arm-benchmarks:
