@@ -1,4 +1,4 @@
-name: Arm benchmark
+name: x64 benchmark
 
 on:
   pull_request:
@@ -7,8 +7,8 @@ on:
     - cron: '0 */6 * * *' # 4 times per day
 
 jobs:
-  proxy-benchmarks:
-    name: proxy job
+  x64-benchmarks:
+    name: x64 job
     runs-on: [self-hosted, X64]
     # timeout-minutes: 120
     steps:
@@ -30,8 +30,8 @@ jobs:
       - name: Network speed test
         if: ${{ always() }}
         run: |
-          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_arm64.tar.gz
-          tar -xvzf librespeed-cli_1.0.10_linux_arm64.tar.gz
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_amd64.tar.gz
           echo "---network speed test start---"
           ./librespeed-cli
           sleep 1
