@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Librespeed test
         run: |
+          echo "PS6 PROXY NOT YET SET ON RUNNERS"
           wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_arm64.tar.gz
           tar -xvzf librespeed-cli_1.0.10_linux_$ARCH.tar.gz
           ./librespeed-cli
@@ -18,6 +19,7 @@ jobs:
     steps:
       - name: Librespeed test
         run: |
+          echo "PS6 PROXY NOT YET SET ON RUNNERS"
           wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
           tar -xvzf librespeed-cli_1.0.10_linux_$ARCH.tar.gz
           ./librespeed-cli
