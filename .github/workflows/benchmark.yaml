@@ -3,18 +3,18 @@ name: X64 benchmark
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: '0 */6 * * *' # 4 times per day
+    - cron: "0 */6 * * *" # 4 times per day
 
 jobs:
   integration-test:
-    name: job job
+    name: Self-hosted X64 benchmarks
     runs-on: [self-hosted, xlarge, linux, X64, jammy]
     # timeout-minutes: 120
     steps:
       ### Network tests
       - name: Download indico resource test
         if: ${{ always() }}
-        run : |
+        run: |
           python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
           export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
           export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
@@ -65,6 +65,7 @@ jobs:
       - name: CPU benchmarks
         if: ${{ always() }}
         run: |
+          curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.deb.sh | sudo bash
           sudo apt-get install sysbench -y
           echo "---CPU benchmark test start---"
           sysbench cpu run
@@ -120,7 +121,7 @@ jobs:
           done
           sleep 1
         ### DISK TESTS
-      - run: sudo apt-get update  
+      - run: sudo apt-get update
         if: ${{ always() }}
       - run: sudo apt install -y fio
         if: ${{ always() }}
