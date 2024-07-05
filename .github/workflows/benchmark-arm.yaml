@@ -3,18 +3,18 @@ name: Arm benchmark
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: '0 */6 * * *' # 4 times per day
+    - cron: "0 */6 * * *" # 4 times per day
 
 jobs:
   arm-benchmarks:
-    name: arm job
+    name: Self-hosted ARM64 benchmarks
     runs-on: [self-hosted, ARM64]
     # timeout-minutes: 120
     steps:
       ### Network tests
       - name: Download indico resource test
         if: ${{ always() }}
-        run : |
+        run: |
           python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
           export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
           export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
@@ -65,6 +65,7 @@ jobs:
       - name: CPU benchmarks
         if: ${{ always() }}
         run: |
+          curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.deb.sh | sudo bash
           sudo apt-get install sysbench -y
           echo "---CPU benchmark test start---"
           sysbench cpu run
@@ -87,6 +88,7 @@ jobs:
           echo "---Charmcraft pack with cache start---"
           for ((i=0; i<10; i++)); do
             time sudo charmcraft pack
+            sleep 1
           done
           sleep 1
           # Subsequent launches without cache
@@ -106,7 +108,7 @@ jobs:
           echo "---Postgresql charm deploy speed test start---"
           for ((i=0; i<10; i++)); do
             juju add-model test
-            juju deploy postgresql --channel 14/stable
+            juju deploy postgresql --channel 14/stable --constraints="arch=arm64"
             time juju wait-for unit postgresql/0 --timeout=15m0s
             juju destroy-model test --no-prompt --destroy-storage
           done
@@ -120,7 +122,7 @@ jobs:
           done
           sleep 1
         ### DISK TESTS
-      - run: sudo apt-get update  
+      - run: sudo apt-get update
         if: ${{ always() }}
       - run: sudo apt install -y fio
         if: ${{ always() }}
