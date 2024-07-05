@@ -4,7 +4,7 @@ on: push
 
 jobs:
   test-arm:
-    name: job job
+    name: Integration tests
     runs-on: [self-hosted, noble]
     steps:
       - name: Fix snap issue in privileged LXD containers
@@ -76,5 +76,3 @@ jobs:
           [ $((ping $HOST_IP -c 5 || :) | grep "Destination Port Unreachable" | wc -l) -eq 5 ]
       - name: Test sctp support
         run: sudo apt-get install lksctp-tools -yq && checksctp
-      - name: Setup tmate session
-        uses: canonical/action-tmate@main

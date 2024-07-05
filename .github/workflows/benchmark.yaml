@@ -7,7 +7,7 @@ on:
 
 jobs:
   integration-test:
-    name: job job
+    name: Self-hosted X64 benchmarks
     runs-on: [self-hosted, xlarge, linux, X64, jammy]
     # timeout-minutes: 120
     steps:

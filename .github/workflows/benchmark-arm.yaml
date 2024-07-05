@@ -7,7 +7,7 @@ on:
 
 jobs:
   arm-benchmarks:
-    name: arm job
+    name: Self-hosted ARM64 benchmarks
     runs-on: [self-hosted, ARM64]
     # timeout-minutes: 120
     steps:
