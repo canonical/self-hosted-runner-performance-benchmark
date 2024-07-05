@@ -1,0 +1,23 @@
+name: Network test
+
+on: pull_request
+
+jobs:
+  network-speed-test-arm:
+    name: Network speed test ARM64
+    runs-on: [self-hosted, stg-private-endpoint, ARM64]
+    steps:
+      - name: Librespeed test
+        run: |
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_arm64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_$ARCH.tar.gz
+          ./librespeed-cli
+  network-speed-test-amd:
+    name: Network speed test AMD64
+    runs-on: [self-hosted, stg-private-endpoint, X64]
+    steps:
+      - name: Librespeed test
+        run: |
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_$ARCH.tar.gz
+          ./librespeed-cli
