@@ -10,7 +10,7 @@ jobs:
     name: PS6 network benchmark no proxy (ARM64)
     runs-on: [network-test, ARM64]
     steps:
-    - name: Download indico resource test
+    - name: Librespeed cli
       if: ${{ always() }}
       run: |
         /home/ubuntu/librespeed/librespeed-cli
@@ -19,7 +19,7 @@ jobs:
     name: PS6 network benchmark no proxy (AMD64)
     runs-on: [network-test, X64]
     steps:
-    - name: Download indico resource test
+    - name: Librespeed cli
       if: ${{ always() }}
       run: |
         /home/ubuntu/librespeed/librespeed-cli
