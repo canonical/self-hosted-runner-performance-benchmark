@@ -1,0 +1,16 @@
+name: Network benchmark no-proxy
+
+on:
+  pull_request:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: "0 */6 * * *" # 4 times per day
+jobs:
+  network-benchmarks:
+    name: PS6 network benchmark no proxy
+    runs-on: [network-test]
+    steps:
+    - name: Download indico resource test
+      if: ${{ always() }}
+      run: |
+        /home/ubuntu/librespeed/librespeed-cli
