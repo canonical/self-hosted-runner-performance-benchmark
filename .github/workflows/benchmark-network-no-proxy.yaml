@@ -6,9 +6,18 @@ on:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 */6 * * *" # 4 times per day
 jobs:
-  network-benchmarks:
-    name: PS6 network benchmark no proxy
-    runs-on: [network-test]
+  network-benchmarks-arm64:
+    name: PS6 network benchmark no proxy (ARM64)
+    runs-on: [network-test, ARM64]
+    steps:
+    - name: Download indico resource test
+      if: ${{ always() }}
+      run: |
+        /home/ubuntu/librespeed/librespeed-cli
+
+  network-benchmarks-amd64:
+    name: PS6 network benchmark no proxy (AMD64)
+    runs-on: [network-test, X64]
     steps:
     - name: Download indico resource test
       if: ${{ always() }}
