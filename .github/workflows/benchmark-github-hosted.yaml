@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     # timeout-minutes: 120
     steps:
+      - run: sudo apt-get update
+        if: ${{ always() }}
       ### Network tests
       - name: Download indico resource test
         if: ${{ always() }}
@@ -120,8 +122,6 @@ jobs:
           done
           sleep 1
         ### DISK TESTS
-      - run: sudo apt-get update
-        if: ${{ always() }}
       - run: sudo apt install -y fio
         if: ${{ always() }}
       - name: seq write

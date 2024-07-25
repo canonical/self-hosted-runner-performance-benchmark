@@ -7,6 +7,8 @@ jobs:
     name: Integration tests
     runs-on: [self-hosted, noble]
     steps:
+      - name: apt update
+        run: sudo apt-get update -y
       - name: Fix snap issue in privileged LXD containers
         run: ln -s /bin/true /usr/local/bin/udevadm
       # Below is a series of simple tests to assess the functionality of the newly spawned runner.
@@ -55,8 +57,6 @@ jobs:
         run: jq --version
       - name: yq version
         run: yq --version
-      - name: apt update
-        run: sudo apt-get update -y
       # Use pipx for 24.04 noble, check-jsonschema breaks OS system packages.
       - name: install pipx
         run: sudo apt-get install -y pipx

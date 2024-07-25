@@ -11,6 +11,8 @@ jobs:
     runs-on: [self-hosted, xlarge, linux, X64, jammy]
     # timeout-minutes: 120
     steps:
+      - run: sudo apt-get update
+        if: ${{ always() }}
       ### Network tests
       - name: Download indico resource test
         if: ${{ always() }}
@@ -65,7 +67,6 @@ jobs:
       - name: CPU benchmarks
         if: ${{ always() }}
         run: |
-          curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.deb.sh | sudo bash
           sudo apt-get install sysbench -y
           echo "---CPU benchmark test start---"
           sysbench cpu run
@@ -121,8 +122,6 @@ jobs:
           done
           sleep 1
         ### DISK TESTS
-      - run: sudo apt-get update
-        if: ${{ always() }}
       - run: sudo apt install -y fio
         if: ${{ always() }}
       - name: seq write
