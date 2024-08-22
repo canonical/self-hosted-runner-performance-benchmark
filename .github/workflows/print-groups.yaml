@@ -1,0 +1,12 @@
+name: Test groups
+
+on: push
+
+jobs:
+  test-groups:
+    name: Integration tests
+    runs-on: [self-hosted]
+    steps:
+      - name: test groups
+        run: |
+          groups
