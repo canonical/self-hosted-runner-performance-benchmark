@@ -5,9 +5,15 @@ jobs:
   test-arm:
     runs-on: [self-hosted, noble]
     steps:
-      - name: test
-        run: echo hi > test.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          name: benchmark-result
-          path: test.txt
+          ref: gh-pages
+      - name: prepare dir
+        run: mkdir -p results/amd64-self-hosted
+      - name: test
+        run: echo hi > results/amd64-self-hosted/test.txt
+      - name: publish
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
