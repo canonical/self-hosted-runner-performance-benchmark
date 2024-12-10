@@ -3,15 +3,33 @@ on:
 
 jobs:
   test-arm:
-    runs-on: [self-hosted, noble]
+    runs-on: [self-hosted, amd64]
     steps:
+      - run: sudo apt-get update
+        if: ${{ always() && !cancalled() }}
+      - name: Download indico resource test
+        if: ${{ always() && !cancalled() }}
+        run: |
+          python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
+          export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
+          export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
+          export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
+          sudo apt-get -y install skopeo
+          sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
+          for ((i=0; i<10; i++)); do
+            time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+            rm -f ./indico_image.tar
+          done
+          sleep 1
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
       - name: prepare dir
-        run: mkdir -p results/amd64-self-hosted
+        run: |
+          mkdir -p results/v1/
+          test -f results/v1/self-hosted-amd64.csv || echo "charmhub resource download\n" > results/v1/self-hosted-amd64.csv
       - name: test
-        run: echo hi >> results/amd64-self-hosted/test.txt
+        run: echo 5 >> results/v1/self-hosted-amd64.csv
       - name: publish
         uses: peaceiris/actions-gh-pages@v4
         with:
