@@ -22,8 +22,9 @@ jobs:
             rm -f ./indico_image.tar temp_time.txt
           done
           sleep 1
-          python3 -c "import pathlib; import statistics; print(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines())))"
-          rm time.txt
+          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+          export CHARMHUB_RESOURCE_DOWNLOAD=$(cat mean_time.txt)
+          rm time.txt mean_time.txt
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
@@ -32,7 +33,7 @@ jobs:
           mkdir -p results/v1/
           test -f results/v1/self-hosted-amd64.csv || echo "charmhub resource download\n" > results/v1/self-hosted-amd64.csv
       - name: test
-        run: echo 5 >> results/v1/self-hosted-amd64.csv
+        run: echo $CHARMHUB_RESOURCE_DOWNLOAD >> results/v1/self-hosted-amd64.csv
       - name: publish
         uses: peaceiris/actions-gh-pages@v4
         with:
