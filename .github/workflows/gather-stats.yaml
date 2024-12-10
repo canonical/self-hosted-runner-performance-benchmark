@@ -11,7 +11,7 @@ jobs:
       - name: prepare dir
         run: mkdir -p results/amd64-self-hosted
       - name: test
-        run: echo hi > results/amd64-self-hosted/test.txt
+        run: echo hi >> results/amd64-self-hosted/test.txt
       - name: publish
         uses: peaceiris/actions-gh-pages@v4
         with:
