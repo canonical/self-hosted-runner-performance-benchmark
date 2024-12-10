@@ -2,7 +2,7 @@ on:
   pull_request:
 
 jobs:
-  test-arm:
+  test-self-hosted-amd64:
     runs-on: [self-hosted, amd64]
     steps:
       - run: sudo apt-get update
@@ -16,11 +16,15 @@ jobs:
           export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
           sudo apt-get -y install skopeo
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          for ((i=0; i<10; i++)); do
-            time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
-            rm -f ./indico_image.tar
+          rm time.txt
+          for ((i=0; i<3; i++)); do
+            /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+            cat temp_time.txt >> time.txt
+            rm -f ./indico_image.tar temp_time.txt
           done
           sleep 1
+          python3 -c "import pathlib; import statistics; print(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines())))"
+          rm time.txt
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
