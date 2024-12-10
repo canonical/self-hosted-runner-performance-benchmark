@@ -7,7 +7,7 @@ jobs:
     steps:
       - run: sudo apt-get update
         if: ${{ always() && !cancelled() }}
-      - name: Download indico resource test
+      - name: Download charmhub resource test
         if: ${{ always() && !cancelled() }}
         run: |
           python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
@@ -24,17 +24,25 @@ jobs:
           sleep 1
           python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
           export CHARMHUB_RESOURCE_DOWNLOAD=$(cat mean_time.txt)
+          echo $CHARMHUB_RESOURCE_DOWNLOAD
           rm time.txt mean_time.txt
-      - uses: actions/checkout@v4
+      - name: Checkout GitHub pages
+        uses: actions/checkout@v4
+        if: ${{ always() && !cancelled() }}
         with:
           ref: gh-pages
       - name: prepare dir
+        if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p results/v1/
-          test -f results/v1/self-hosted-amd64.csv || echo "charmhub resource download\n" > results/v1/self-hosted-amd64.csv
-      - name: test
-        run: echo $CHARMHUB_RESOURCE_DOWNLOAD >> results/v1/self-hosted-amd64.csv
-      - name: publish
+          test -f results/v1/self-hosted-amd64.csv || echo "charmhub resource download" > results/v1/self-hosted-amd64.csv
+      - name: Write results
+        if: ${{ always() && !cancelled() }}
+        run: |
+          echo $CHARMHUB_RESOURCE_DOWNLOAD
+          echo $CHARMHUB_RESOURCE_DOWNLOAD >> results/v1/self-hosted-amd64.csv
+      - name: Publish
+        if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
