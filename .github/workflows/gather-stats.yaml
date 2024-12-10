@@ -1,0 +1,9 @@
+on:
+  pull_request:
+
+jobs:
+  test-arm:
+    runs-on: [self-hosted, noble]
+    steps:
+      - name: test
+        run: echo hi
