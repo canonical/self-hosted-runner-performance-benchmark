@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import os
 
-my_data = pd.read_csv(f"results/v1/{os.getenv[RUN_NAME}.csv")
+my_data = pd.read_csv(f"results/v1/{os.getenv(RUN_NAME)}.csv")
 my_data["time"] = pd.to_datetime(my_data["time"])
 
 figure, axis = plt.subplots(2, 4)
