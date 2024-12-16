@@ -1,0 +1,10 @@
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  benchmark-self-hosted-amd64:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: self-hosted
+      runs-on-architecture: amd64

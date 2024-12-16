@@ -1,21 +1,24 @@
-name: X64 benchmark
-
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: "0 */6 * * *" # 4 times per day
+  workflow_call:
 
 jobs:
-  integration-test:
-    name: Self-hosted X64 benchmarks
-    runs-on: [self-hosted, xlarge, linux, X64, jammy]
-    # timeout-minutes: 120
+  run:
+    inputs:
+      runs-on-hosted:
+        type: string
+        description: Whether to use self or GitHub hosted runners, either use ubuntu-latest for GitHub hosted or self-hosted
+      runs-on-architecture:
+        type: string
+        description: The architecture to use, either x64, amd64 or arm64
+    runs-on: [${{ inputs.runs-on-hosted }}, ${{ inputs.runs-on-architecture }}]
+    env:
+      RUN_NAME: ${{ format('${0}-${1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
     steps:
       - run: sudo apt-get update
-        if: ${{ always() }}
-      ### Network tests
-      - name: Download indico resource test
-        if: ${{ always() }}
+        if: ${{ always() && !cancelled() }}
+      - name: Download charmhub resource test
+        if: ${{ always() && !cancelled() }}
+        id: charmhub-resource-download
         run: |
           python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
           export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
@@ -23,124 +26,36 @@ jobs:
           export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
           sudo apt-get -y install skopeo
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          for ((i=0; i<10; i++)); do
-            time sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
-            rm -f ./indico_image.tar
+          for ((i=0; i<3; i++)); do
+            /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+            cat temp_time.txt >> time.txt
+            rm -f ./indico_image.tar temp_time.txt
           done
           sleep 1
-      - name: Network speed test
-        if: ${{ always() }}
+          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+          cat mean_time.txt
+          echo "result=$(cat mean_time.txt)" >> $GITHUB_OUTPUT
+          rm time.txt mean_time.txt
+      - name: Checkout GitHub pages
+        uses: actions/checkout@v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          ref: gh-pages
+      - name: prepare dir
+        if: ${{ always() && !cancelled() }}
         run: |
-          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
-          tar -xvzf librespeed-cli_1.0.10_linux_amd64.tar.gz
-          echo "---network speed test start---"
-          ./librespeed-cli
-          sleep 1
-      - name: Docker image pull speed (pull through cache)
-        if: ${{ always() }}
+          mkdir -p results/v1/
+          test -f results/v1/$RUN_NAME.csv || echo "time,charmhub resource download," > results/v1/$RUN_NAME.csv
+      - name: Write results
+        if: ${{ always() && !cancelled() }}
+        env:
+          CHARMHUB_RESOURCE_DOWNLOAD: ${{ steps.charmhub-resource-download.outputs.result }}
         run: |
-          echo "---docker image pull speed test start (pull through cache)---"
-          for ((i=0; i<10; i++)); do
-            time docker pull busybox --quiet
-            docker system prune --all -f
-          done
-          sleep 1
-      - name: Docker image pull speed (no pull through cache)
-        if: ${{ always() }}
-        run: |
-          echo "---docker image pull speed test start (no cache)---"
-          for ((i=0; i<10; i++)); do
-            time docker pull registry.hub.docker.com/library/busybox --quiet
-            docker system prune --all -f
-          done
-          sleep 1
-      - name: Docker image pull speed (mysql)
-        if: ${{ always() }}
-        run: |
-          echo "---docker image pull speed test start (mysql)---"
-          for ((i=0; i<10; i++)); do
-            time docker pull ghcr.io/canonical/charmed-mysql@sha256:5082c99baa7a77c82d73247674e270838dc0a8165c02f7619cf5642d1427cba7 --quiet
-            docker system prune --all -f
-          done
-          sleep 1
-      ### CPU TESTS
-      - name: CPU benchmarks
-        if: ${{ always() }}
-        run: |
-          sudo apt-get install sysbench -y
-          echo "---CPU benchmark test start---"
-          sysbench cpu run
-          sleep 1
-      - uses: canonical/setup-lxd@v0.1.1
-        if: ${{ always() }}
-      - name: Charmcraft pack speed
-        if: ${{ always() }}
-        run: |
-          lxd init --auto
-          sudo snap install charmcraft --classic
-          git clone https://github.com/canonical/github-runner-operator.git
-          cd github-runner-operator
-          # First launch
-          echo "First launch"
-          echo "---Charmcraft pack first launch test start---"
-          time sudo charmcraft pack
-          sleep 1
-          # Subsequent launches with cache
-          echo "---Charmcraft pack with cache start---"
-          for ((i=0; i<10; i++)); do
-            time sudo charmcraft pack
-          done
-          sleep 1
-          # Subsequent launches without cache
-          echo "---Charmcraft pack without cache start---"
-          for ((i=0; i<10; i++)); do
-            sudo charmcraft clean
-            time sudo charmcraft pack
-          done
-          sleep 1
-      - name: Postgresql charm deploy speed
-        if: ${{ always() }}
-        run: |
-          time sudo snap install juju
-          mkdir -p ~/.local/share/juju
-          time juju bootstrap localhost localhost
-          sleep 1
-          echo "---Postgresql charm deploy speed test start---"
-          for ((i=0; i<10; i++)); do
-            juju add-model test
-            juju deploy postgresql --channel 14/stable
-            time juju wait-for unit postgresql/0 --timeout=15m0s
-            juju destroy-model test --no-prompt --destroy-storage
-          done
-          sleep 1
-      - name: Postgresql charm download speed
-        if: ${{ always() }}
-        run: |
-          echo "---Postgresql charm download speed test start---"
-          for ((i=0; i<10; i++)); do
-            time (juju download postgresql --channel "14/stable"; snap download charmed-postgresql  --channel "14/edge")
-          done
-          sleep 1
-        ### DISK TESTS
-      - run: sudo apt install -y fio
-        if: ${{ always() }}
-      - name: seq write
-        if: ${{ always() }}
-        run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=write --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
-      - run: sudo rm -f /write* /read*
-        if: ${{ always() }}
-      - name: rand write
-        if: ${{ always() }}
-        run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randwrite --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
-      - run: sudo rm -f /write* /read*
-        if: ${{ always() }}
-      - name: seq read
-        if: ${{ always() }}
-        run: sudo fio --name=write_throughput --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=read --group_reporting=1 --iodepth_batch_submit=64 --iodepth_batch_complete_max=64
-      - run: sudo rm -f /write* /read*
-        if: ${{ always() }}
-      - name: rand read
-        if: ${{ always() }}
-        run: sudo fio --name=write_iops --directory=/ --numjobs=4 --size=3G --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=4k --iodepth=256 --rw=randread --group_reporting=1 --iodepth_batch_submit=256 --iodepth_batch_complete_max=256
-      - run: sudo rm -f /write* /read*
-        if: ${{ always() }}
+          echo $CHARMHUB_RESOURCE_DOWNLOAD
+          echo $(TZ=UTC date +"%Y-%m-%dT%H:%M:%S%z"),$CHARMHUB_RESOURCE_DOWNLOAD, >> results/v1/$RUN_NAME.csv
+      - name: Publish
+        if: ${{ always() && !cancelled() }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
