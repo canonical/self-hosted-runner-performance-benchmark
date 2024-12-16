@@ -1,9 +1,7 @@
 name: GitHub Hosted benchmark
 
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: "0 0 */5 * *" # Every 5 days
+  workflow_dispatch:
 
 jobs:
   integration-test:
