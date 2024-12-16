@@ -69,7 +69,7 @@ jobs:
           echo "---CPU benchmark test start---"
           sysbench cpu run
           sleep 1
-      - uses: canonical/setup-lxd@v0.1.1
+      - uses: canonical/setup-lxd@v0.1.2
         if: ${{ always() }}
       - name: Charmcraft pack speed
         if: ${{ always() }}
