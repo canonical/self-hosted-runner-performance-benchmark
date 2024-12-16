@@ -82,7 +82,10 @@ jobs:
       - name: Create charts
         if: ${{ always() && !cancelled() }}
         run: |
-          python3 -m pip install matplotlib pandas
+          sudo apt install -y python3-venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install matplotlib pandas
           echo '
           from matplotlib import pyplot as plt
           import pandas as pd
@@ -93,48 +96,48 @@ jobs:
           my_data = pd.read_csv(f"results/v1/{run_name}.csv")
           my_data["time"] = pd.to_datetime(my_data["time"])
 
-          figure, axis = plt.subplots(2, 4)
+          plt.subplot(2, 4, 1)
+          plt.plot(my_data["time"], my_data["network speed test ping (s)"])
+          plt.title("Network Speed Test Ping")
+          plt.xlabel("Time")
+          plt.ylabel("Seconds")
 
-          axis[0, 0].plot(my_data["time"], my_data["network speed test ping (s)"])
-          axis[0, 0].set_title("Network Speed Test Ping")
-          axis[0, 0].set_xlabel("Time")
-          axis[0, 0].set_ylabel("Seconds")
+          plt.subplot(2, 4, 2)
+          plt.plot(my_data["time"], my_data["jitter (s)"])
+          plt.title("Jitter")
+          plt.xlabel("Time")
+          plt.ylabel("Seconds")
 
-          axis[0, 1].plot(my_data["time"], my_data["jitter (s)"])
-          axis[0, 1].set_title("Jitter")
-          axis[0, 1].set_xlabel("Time")
-          axis[0, 1].set_ylabel("Seconds")
+          plt.subplot(2, 4, 3)
+          plt.plot(my_data["time"], my_data["upload (bit/s)"])
+          plt.title("Upload")
+          plt.xlabel("Time")
+          plt.ylabel("MBit/s")
 
-          axis[0, 2].plot(my_data["time"], my_data["upload (bit/s)"])
-          axis[0, 2].set_title("Upload")
-          axis[0, 2].set_xlabel("Time")
-          axis[0, 2].set_ylabel("MBit/s")
+          plt.subplot(2, 4, 4)
+          plt.plot(my_data["time"], my_data["download (bit/s)"])
+          plt.title("Download")
+          plt.xlabel("Time")
+          plt.ylabel("MBit/s")
 
-          axis[0, 3].plot(my_data["time"], my_data["download (bit/s)"])
-          axis[0, 3].set_title("Download")
-          axis[0, 3].set_xlabel("Time")
-          axis[0, 3].set_ylabel("MBit/s")
+          plt.subplot(2, 1, 2)
+          plt.plot(my_data["time"], my_data["max (s)"], label = "max")
+          plt.plot(my_data["time"], my_data["charmhub resource download mean (s)"], label = "mean")
+          plt.plot(my_data["time"], my_data["min (s)"], label = "min")
+          plt.legend()
+          plt.title("Charmhub Resource Download")
+          plt.xlabel("Time")
+          plt.ylabel("Seconds")
 
-          axis[1, 0].plot(my_data["time"], my_data["charmhub resource download mean (s)"])
-          axis[1, 0].set_title("Charmhub Resource Download Mean")
-          axis[1, 0].set_xlabel("Time")
-          axis[1, 0].set_ylabel("Seconds")
-
-          axis[1, 1].plot(my_data["time"], my_data["min (s)"])
-          axis[1, 1].set_title("Min")
-          axis[1, 1].set_xlabel("Time")
-          axis[1, 1].set_ylabel("Seconds")
-
-          axis[1, 2].plot(my_data["time"], my_data["max (s)"])
-          axis[1, 2].set_title("Max")
-          axis[1, 2].set_xlabel("Time")
-          axis[1, 2].set_ylabel("Seconds")
-
-          figure.set_figwidth(1.5 * 16)
-          figure.set_figheight(1.5 * 9)
+          fig = plt.gcf()
+          fig.set_figwidth(1.5 * 16)
+          fig.set_figheight(1.5 * 9)
           plt.savefig(f"results/v1/{run_name}.png")
           ' > create_chart.py
-          python3 create_chart.py
+          python create_chart.py
+          deactivate
+          rm -rf .venv
+          rm create_chart.py
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
