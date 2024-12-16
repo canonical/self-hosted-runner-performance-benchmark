@@ -45,5 +45,5 @@ axis[1, 2].set_ylabel("Seconds")
 
 figure.set_figwidth(1.5 * 16)
 figure.set_figheight(1.5 * 9)
-plt.savefig(f"results/v1/{os.getenv[RUN_NAME}.png")
+plt.savefig(f"results/v1/{os.getenv(RUN_NAME)}.png")
 
