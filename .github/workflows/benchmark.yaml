@@ -16,6 +16,14 @@ jobs:
     steps:
       - run: sudo apt-get update
         if: ${{ always() && !cancelled() }}
+      - name: Network speed test
+        if: ${{ always() && !cancelled() }}
+        run: |
+          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_amd64.tar.gz
+          tar -xvzf librespeed-cli_1.0.10_linux_amd64.tar.gz
+          echo "---network speed test start---"
+          ./librespeed-cli --json
+          sleep 1
       - name: Download charmhub resource test
         if: ${{ always() && !cancelled() }}
         id: charmhub-resource-download
