@@ -82,7 +82,7 @@ jobs:
       - name: Create charts
         if: ${{ always() && !cancelled() }}
         run: |
-          sudo apt install -y python3-virtualenv
+          sudo apt install -y python3-venv
           python3 -m venv .venv
           source .venv/bin/activate
           pip install matplotlib pandas
