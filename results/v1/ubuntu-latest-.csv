@@ -1,0 +1,2 @@
+time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s), min (s), max (s),
+2024-12-16T14:28:50+0000,13.36,0.42,1743.73,6485.15,29.396,27.55,34.04,
