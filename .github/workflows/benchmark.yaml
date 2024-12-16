@@ -41,7 +41,7 @@ jobs:
           export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
           sudo apt-get -y install skopeo
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          for ((i=0; i<10; i++)); do
+          for ((i=0; i<3; i++)); do
             /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
             cat temp_time.txt >> time.txt
             rm -f ./indico_image.tar temp_time.txt
@@ -66,7 +66,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p results/v1/
-          test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s), min (s), max (s)," > results/v1/$RUN_NAME.csv
+          test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s),min (s),max (s)," > results/v1/$RUN_NAME.csv
       - name: Write results
         if: ${{ always() && !cancelled() }}
         env:
@@ -78,8 +78,61 @@ jobs:
           CHARMHUB_RESOURCE_DOWNLOAD_MIN: ${{ steps.charmhub-resource-download.outputs.min }}
           CHARMHUB_RESOURCE_DOWNLOAD_MAX: ${{ steps.charmhub-resource-download.outputs.max }}
         run: |
-          printenv
           echo $(TZ=UTC date +"%Y-%m-%dT%H:%M:%S%z"),$NETWORK_SPEED_TEST_PING,$NETWORK_SPEED_TEST_JITTER,$NETWORK_SPEED_TEST_UPLOAD,$NETWORK_SPEED_TEST_DOWNLOAD,$CHARMHUB_RESOURCE_DOWNLOAD_MEAN,$CHARMHUB_RESOURCE_DOWNLOAD_MIN,$CHARMHUB_RESOURCE_DOWNLOAD_MAX, >> results/v1/$RUN_NAME.csv
+      - name: Create charts
+        if: ${{ always() && !cancelled() }}
+        run: |
+          python3 -m pip install matplotlib pandas
+          echo '
+          from matplotlib import pyplot as plt
+          import pandas as pd
+          import os
+
+          my_data = pd.read_csv(f"results/v1/{os.getenv['RUN_NAME'}.csv")
+          my_data["time"] = pd.to_datetime(my_data["time"])
+
+          figure, axis = plt.subplots(2, 4)
+
+          axis[0, 0].plot(my_data['time'], my_data["network speed test ping (s)"])
+          axis[0, 0].set_title("Network Speed Test Ping")
+          axis[0, 0].set_xlabel("Time")
+          axis[0, 0].set_ylabel("Seconds")
+
+          axis[0, 1].plot(my_data['time'], my_data["jitter (s)"])
+          axis[0, 1].set_title("Jitter")
+          axis[0, 1].set_xlabel("Time")
+          axis[0, 1].set_ylabel("Seconds")
+
+          axis[0, 2].plot(my_data['time'], my_data["upload (bit/s)"])
+          axis[0, 2].set_title("Upload")
+          axis[0, 2].set_xlabel("Time")
+          axis[0, 2].set_ylabel("MBit/s")
+
+          axis[0, 3].plot(my_data['time'], my_data["download (bit/s)"])
+          axis[0, 3].set_title("Download")
+          axis[0, 3].set_xlabel("Time")
+          axis[0, 3].set_ylabel("MBit/s")
+
+          axis[1, 0].plot(my_data['time'], my_data["charmhub resource download mean (s)"])
+          axis[1, 0].set_title("Charmhub Resource Download Mean")
+          axis[1, 0].set_xlabel("Time")
+          axis[1, 0].set_ylabel("Seconds")
+
+          axis[1, 1].plot(my_data['time'], my_data["min (s)"])
+          axis[1, 1].set_title("Min")
+          axis[1, 1].set_xlabel("Time")
+          axis[1, 1].set_ylabel("Seconds")
+
+          axis[1, 2].plot(my_data['time'], my_data["max (s)"])
+          axis[1, 2].set_title("Max")
+          axis[1, 2].set_xlabel("Time")
+          axis[1, 2].set_ylabel("Seconds")
+
+          figure.set_figwidth(1.5 * 16)
+          figure.set_figheight(1.5 * 9)
+          plt.savefig(f"results/v1/{os.getenv['RUN_NAME'}.png")
+          ' > create_chart.py
+          python3 create_chart.py
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
