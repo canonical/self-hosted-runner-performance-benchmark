@@ -7,10 +7,11 @@ on:
       runs-on-architecture:
         type: string
         description: The architecture to use, either x64, amd64 or arm64
+        default: ''
 
 jobs:
   run:
-    runs-on: ${{ fromJson(format('[''{0}'', ''{1}'']', inputs.runs-on-hosted, inputs.runs-on-architecture)) }}
+    runs-on: ${{ inputs.runs-on-hosted == 'self-hosted' && fromJson(format('[''{0}'', ''{1}'']', inputs.runs-on-hosted, inputs.runs-on-architecture)) || inputs.runs-on-hosted }}
     env:
       RUN_NAME: ${{ format('{0}-{1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
     steps:

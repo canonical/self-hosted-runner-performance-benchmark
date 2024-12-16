@@ -10,4 +10,3 @@ jobs:
     uses: ./.github/workflows/benchmark.yaml
     with:
       runs-on-hosted: ubuntu-latest
-      runs-on-architecture: x64
