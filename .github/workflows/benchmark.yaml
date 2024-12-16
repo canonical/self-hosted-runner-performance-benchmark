@@ -82,7 +82,10 @@ jobs:
       - name: Create charts
         if: ${{ always() && !cancelled() }}
         run: |
-          python3 -m pip install matplotlib pandas
+          sudo apt install python3-virtualenv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install matplotlib pandas
           echo '
           from matplotlib import pyplot as plt
           import pandas as pd
@@ -131,7 +134,7 @@ jobs:
           fig.set_figheight(1.5 * 9)
           plt.savefig(f"results/v1/{run_name}.png")
           ' > create_chart.py
-          python3 create_chart.py
+          python create_chart.py
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
