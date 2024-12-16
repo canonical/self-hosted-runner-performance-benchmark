@@ -137,6 +137,7 @@ jobs:
           python create_chart.py
           deactivate
           rm -rf .venv
+          rm create_chart.py
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
