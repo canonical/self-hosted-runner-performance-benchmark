@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: "0 */2 * * *" # 12 times per day
+    - cron: "40 */2 * * *" # 12 times per day
 
 jobs:
   benchmark-self-hosted-arm64:
