@@ -135,6 +135,8 @@ jobs:
           plt.savefig(f"results/v1/{run_name}.png")
           ' > create_chart.py
           python create_chart.py
+          deactivate
+          rm -rf .venv
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4
