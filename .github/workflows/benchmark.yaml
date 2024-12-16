@@ -10,9 +10,9 @@ on:
 
 jobs:
   run:
-    runs-on: ${{ fromJson(format('[''${0}'', ''${1}'']', inputs.runs-on-hosted, inputs.runs-on-architecture)) }}
+    runs-on: ${{ fromJson(format('[''{0}'', ''{1}'']', inputs.runs-on-hosted, inputs.runs-on-architecture)) }}
     env:
-      RUN_NAME: ${{ format('${0}-${1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
+      RUN_NAME: ${{ format('{0}-{1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
     steps:
       - run: sudo apt-get update
         if: ${{ always() && !cancelled() }}
