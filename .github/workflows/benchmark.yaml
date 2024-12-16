@@ -15,70 +15,70 @@ jobs:
     env:
       RUN_NAME: ${{ format('{0}-{1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
     steps:
-      - run: sudo apt-get update
-        if: ${{ always() && !cancelled() }}
-      - name: Network speed test
-        if: ${{ always() && !cancelled() }}
-        id: network-speed-test
-        run: |
-          wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
-          tar -xvzf librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
-          echo "---network speed test start---"
-          ./librespeed-cli --json > speedtest-result.json
-          sleep 1
-          echo "ping=$(cat speedtest-result.json | jq '.[0].ping')" >> $GITHUB_OUTPUT
-          echo "jitter=$(cat speedtest-result.json | jq '.[0].jitter')" >> $GITHUB_OUTPUT
-          echo "upload=$(cat speedtest-result.json | jq '.[0].upload')" >> $GITHUB_OUTPUT
-          echo "download=$(cat speedtest-result.json | jq '.[0].download')" >> $GITHUB_OUTPUT
-          rm speedtest-result.json librespeed-cli librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
-      - name: Download charmhub resource test
-        if: ${{ always() && !cancelled() }}
-        id: charmhub-resource-download
-        run: |
-          python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
-          export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
-          export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
-          export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
-          sudo apt-get -y install skopeo
-          sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          for ((i=0; i<3; i++)); do
-            /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
-            cat temp_time.txt >> time.txt
-            rm -f ./indico_image.tar temp_time.txt
-          done
-          sleep 1
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'min_time.txt').write_text(str(min(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'max_time.txt').write_text(str(max(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
-          cat mean_time.txt
-          cat min_time.txt
-          cat max_time.txt
-          echo "mean=$(cat mean_time.txt)" >> $GITHUB_OUTPUT
-          echo "min=$(cat min_time.txt)" >> $GITHUB_OUTPUT
-          echo "max=$(cat max_time.txt)" >> $GITHUB_OUTPUT
-          rm time.txt mean_time.txt min_time.txt max_time.txt
+      # - run: sudo apt-get update
+      #   if: ${{ always() && !cancelled() }}
+      # - name: Network speed test
+      #   if: ${{ always() && !cancelled() }}
+      #   id: network-speed-test
+      #   run: |
+      #     wget https://github.com/librespeed/speedtest-cli/releases/download/v1.0.10/librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
+      #     tar -xvzf librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
+      #     echo "---network speed test start---"
+      #     ./librespeed-cli --json > speedtest-result.json
+      #     sleep 1
+      #     echo "ping=$(cat speedtest-result.json | jq '.[0].ping')" >> $GITHUB_OUTPUT
+      #     echo "jitter=$(cat speedtest-result.json | jq '.[0].jitter')" >> $GITHUB_OUTPUT
+      #     echo "upload=$(cat speedtest-result.json | jq '.[0].upload')" >> $GITHUB_OUTPUT
+      #     echo "download=$(cat speedtest-result.json | jq '.[0].download')" >> $GITHUB_OUTPUT
+      #     rm speedtest-result.json librespeed-cli librespeed-cli_1.0.10_linux_$(dpkg --print-architecture).tar.gz
+      # - name: Download charmhub resource test
+      #   if: ${{ always() && !cancelled() }}
+      #   id: charmhub-resource-download
+      #   run: |
+      #     python3 -c 'from urllib.request import Request, urlopen; from pathlib import Path; Path("image_location.json").write_bytes(urlopen("https://api.charmhub.io/api/v1/resources/download/charm_18zuSzvljyQo6mJMWjcjN2nMm1TiWKCF.indico-image_179").read())'
+      #     export INDICO_IMAGE_NAME=($(jq -r '.ImageName' image_location.json))
+      #     export CHARMHUB_REGISTRY_USERNAME=($(jq -r '.Username' image_location.json))
+      #     export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
+      #     sudo apt-get -y install skopeo
+      #     sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
+      #     for ((i=0; i<3; i++)); do
+      #       /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
+      #       cat temp_time.txt >> time.txt
+      #       rm -f ./indico_image.tar temp_time.txt
+      #     done
+      #     sleep 1
+      #     python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+      #     python3 -c "import pathlib; import statistics; (pathlib.Path() / 'min_time.txt').write_text(str(min(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+      #     python3 -c "import pathlib; import statistics; (pathlib.Path() / 'max_time.txt').write_text(str(max(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+      #     cat mean_time.txt
+      #     cat min_time.txt
+      #     cat max_time.txt
+      #     echo "mean=$(cat mean_time.txt)" >> $GITHUB_OUTPUT
+      #     echo "min=$(cat min_time.txt)" >> $GITHUB_OUTPUT
+      #     echo "max=$(cat max_time.txt)" >> $GITHUB_OUTPUT
+      #     rm time.txt mean_time.txt min_time.txt max_time.txt
       - name: Checkout GitHub pages
         uses: actions/checkout@v4
         if: ${{ always() && !cancelled() }}
         with:
           ref: gh-pages
-      - name: prepare dir
-        if: ${{ always() && !cancelled() }}
-        run: |
-          mkdir -p results/v1/
-          test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s),min (s),max (s)," > results/v1/$RUN_NAME.csv
-      - name: Write results
-        if: ${{ always() && !cancelled() }}
-        env:
-          NETWORK_SPEED_TEST_PING: ${{ steps.network-speed-test.outputs.ping }}
-          NETWORK_SPEED_TEST_JITTER: ${{ steps.network-speed-test.outputs.jitter }}
-          NETWORK_SPEED_TEST_UPLOAD: ${{ steps.network-speed-test.outputs.upload }}
-          NETWORK_SPEED_TEST_DOWNLOAD: ${{ steps.network-speed-test.outputs.download }}
-          CHARMHUB_RESOURCE_DOWNLOAD_MEAN: ${{ steps.charmhub-resource-download.outputs.mean }}
-          CHARMHUB_RESOURCE_DOWNLOAD_MIN: ${{ steps.charmhub-resource-download.outputs.min }}
-          CHARMHUB_RESOURCE_DOWNLOAD_MAX: ${{ steps.charmhub-resource-download.outputs.max }}
-        run: |
-          echo $(TZ=UTC date +"%Y-%m-%dT%H:%M:%S%z"),$NETWORK_SPEED_TEST_PING,$NETWORK_SPEED_TEST_JITTER,$NETWORK_SPEED_TEST_UPLOAD,$NETWORK_SPEED_TEST_DOWNLOAD,$CHARMHUB_RESOURCE_DOWNLOAD_MEAN,$CHARMHUB_RESOURCE_DOWNLOAD_MIN,$CHARMHUB_RESOURCE_DOWNLOAD_MAX, >> results/v1/$RUN_NAME.csv
+      # - name: prepare dir
+      #   if: ${{ always() && !cancelled() }}
+      #   run: |
+      #     mkdir -p results/v1/
+      #     test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s),min (s),max (s)," > results/v1/$RUN_NAME.csv
+      # - name: Write results
+      #   if: ${{ always() && !cancelled() }}
+      #   env:
+      #     NETWORK_SPEED_TEST_PING: ${{ steps.network-speed-test.outputs.ping }}
+      #     NETWORK_SPEED_TEST_JITTER: ${{ steps.network-speed-test.outputs.jitter }}
+      #     NETWORK_SPEED_TEST_UPLOAD: ${{ steps.network-speed-test.outputs.upload }}
+      #     NETWORK_SPEED_TEST_DOWNLOAD: ${{ steps.network-speed-test.outputs.download }}
+      #     CHARMHUB_RESOURCE_DOWNLOAD_MEAN: ${{ steps.charmhub-resource-download.outputs.mean }}
+      #     CHARMHUB_RESOURCE_DOWNLOAD_MIN: ${{ steps.charmhub-resource-download.outputs.min }}
+      #     CHARMHUB_RESOURCE_DOWNLOAD_MAX: ${{ steps.charmhub-resource-download.outputs.max }}
+      #   run: |
+      #     echo $(TZ=UTC date +"%Y-%m-%dT%H:%M:%S%z"),$NETWORK_SPEED_TEST_PING,$NETWORK_SPEED_TEST_JITTER,$NETWORK_SPEED_TEST_UPLOAD,$NETWORK_SPEED_TEST_DOWNLOAD,$CHARMHUB_RESOURCE_DOWNLOAD_MEAN,$CHARMHUB_RESOURCE_DOWNLOAD_MIN,$CHARMHUB_RESOURCE_DOWNLOAD_MAX, >> results/v1/$RUN_NAME.csv
       - name: Create charts
         if: ${{ always() && !cancelled() }}
         run: |
@@ -88,7 +88,7 @@ jobs:
           import pandas as pd
           import os
 
-          my_data = pd.read_csv(f"results/v1/{os.getenv['RUN_NAME'}.csv")
+          my_data = pd.read_csv(f"results/v1/{os.getenv('RUN_NAME')}.csv")
           my_data["time"] = pd.to_datetime(my_data["time"])
 
           figure, axis = plt.subplots(2, 4)
