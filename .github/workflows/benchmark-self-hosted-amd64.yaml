@@ -4,7 +4,7 @@ on:
 
 jobs:
   benchmark-self-hosted-amd64:
-    uses: canonical/self-hosted-runner-performance-benchmark/.github/workflows/benchmark.yaml@gather-stats
+    uses: /.github/workflows/benchmark.yaml
     with:
       runs-on-hosted: self-hosted
       runs-on-architecture: amd64
