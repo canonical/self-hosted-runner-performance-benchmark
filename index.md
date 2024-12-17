@@ -10,7 +10,7 @@ from Charmhub.
 For each type of runner below, there are two rows of charts. The first row shows the speed test
 and the second row shows the Charmhub resource download result.
 
-For the speedtest row, The first chart for the speedtest is the ping in milliseconds and the
+For the speedtest row, the first chart for the speedtest is the ping in milliseconds and the
 second chart shows the jitter also in milliseconds. The third chart shows the download and upload
 speed in MBit/s. These chart shows the health of the networking.
 
