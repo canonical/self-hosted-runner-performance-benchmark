@@ -23,12 +23,200 @@ jobs:
     with:
       runs-on-hosted: ubuntu-latest
       run-name: github-hosted
+  comparison:
+    runs-on: [self-hosted, amd64]
+    needs:
+      - benchmark-self-hosted-arm64
+      - benchmark-self-hosted-amd64
+      - benchmark-github-hosted
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: self-hosted-amd-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-hosted-csv
+          path: results/v1/
+      - name: Create charts
+        if: ${{ always() && !cancelled() }}
+        run: |
+          sudo apt install -y python3-venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install matplotlib pandas
+          echo '
+          import datetime
+
+          import pandas as pd
+          import pytz
+          from matplotlib import pyplot as plt
+
+          self_hosted_data = pd.read_csv("results/v1/self-hosted-amd.csv")
+          self_hosted_data["time"] = pd.to_datetime(self_hosted_data["time"])
+          self_hosted_data = self_hosted_data[
+              self_hosted_data.time
+              >= pd.to_datetime(
+                  datetime.datetime.now().replace(tzinfo=pytz.UTC) - datetime.timedelta(days=7)
+              )
+          ]
+
+          github_hosted_data = pd.read_csv("results/v1/github-hosted.csv")
+          github_hosted_data["time"] = pd.to_datetime(self_hosted_data["time"])
+          github_hosted_data = github_hosted_data[
+              github_hosted_data.time
+              >= pd.to_datetime(
+                  datetime.datetime.now().replace(tzinfo=pytz.UTC) - datetime.timedelta(days=7)
+              )
+          ]
+
+          ping_column_name = "network speed test ping (s)"
+          comparison_data = self_hosted_data
+          comparison_data[ping_column_name] = (
+              comparison_data[ping_column_name] - github_hosted_data[ping_column_name]
+          )
+          jitter_column_name = "jitter (s)"
+          comparison_data[jitter_column_name] = (
+              comparison_data[jitter_column_name] - github_hosted_data[jitter_column_name]
+          )
+          upload_column_name = "upload (bit/s)"
+          comparison_data[upload_column_name] = (
+              comparison_data[upload_column_name] - github_hosted_data[upload_column_name]
+          )
+          download_column_name = "download (bit/s)"
+          comparison_data[download_column_name] = (
+              comparison_data[download_column_name] - github_hosted_data[download_column_name]
+          )
+          ch_mean_download_column_name = "charmhub resource download mean (s)"
+          comparison_data[ch_mean_download_column_name] = (
+              comparison_data[ch_mean_download_column_name]
+              - github_hosted_data[ch_mean_download_column_name]
+          )
+          ch_min_download_column_name = "min (s)"
+          comparison_data[ch_min_download_column_name] = (
+              comparison_data[ch_min_download_column_name]
+              - github_hosted_data[ch_min_download_column_name]
+          )
+          ch_max_download_column_name = "max (s)"
+          comparison_data[ch_max_download_column_name] = (
+              comparison_data[ch_max_download_column_name]
+              - github_hosted_data[ch_max_download_column_name]
+          )
+
+
+          def get_color_low_better(data):
+              return ["r" if val > 0 else "g" for val in data]
+
+
+          def get_color_high_better(data):
+              return ["g" if val > 0 else "r" for val in data]
+
+
+          plt.subplot(2, 4, 1)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[ping_column_name],
+              color=get_color_low_better(comparison_data[ping_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Network Speed Test Ping")
+          plt.xlabel("time")
+          plt.ylabel("milliseconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 4, 2)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[jitter_column_name],
+              color=get_color_low_better(comparison_data[jitter_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Jitter")
+          plt.xlabel("time")
+          plt.ylabel("milliseconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 4, 3)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[upload_column_name],
+              color=get_color_high_better(comparison_data[upload_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Upload (MBit/s)")
+          plt.xlabel("time")
+          plt.ylabel("milliseconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 4, 4)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[download_column_name],
+              color=get_color_high_better(comparison_data[download_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Download (MBit/s)")
+          plt.xlabel("time")
+          plt.ylabel("milliseconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 3, 4)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[ch_mean_download_column_name],
+              color=get_color_low_better(comparison_data[ch_mean_download_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Charmhub Resource Download Mean")
+          plt.xlabel("time")
+          plt.ylabel("seconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 3, 5)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[ch_min_download_column_name],
+              color=get_color_low_better(comparison_data[ch_min_download_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Charmhub Resource Download Min")
+          plt.xlabel("time")
+          plt.ylabel("seconds")
+          plt.xticks(rotation=30)
+
+          plt.subplot(2, 3, 6)
+          plt.scatter(
+              comparison_data["time"],
+              comparison_data[ch_max_download_column_name],
+              color=get_color_low_better(comparison_data[ch_max_download_column_name]),
+          )
+          plt.axhline(y=0)
+          plt.title("Charmhub Resource Download Max")
+          plt.xlabel("time")
+          plt.ylabel("seconds")
+          plt.xticks(rotation=30)
+
+          fig = plt.gcf()
+          fig.set_figwidth(1.5 * 16)
+          fig.set_figheight(1.5 * 9)
+          plt.savefig(f"results/v1/comparison.png")
+          ' > create_chart.py
+          python create_chart.py
+          deactivate
+          rm -rf .venv
+          rm create_chart.py
+      - name: Upload png
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison-png
+          path: results/v1/comparison.png
   publish:
     runs-on: [self-hosted, amd64]
     needs:
       - benchmark-self-hosted-arm64
       - benchmark-self-hosted-amd64
       - benchmark-github-hosted
+      - comparison
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -53,6 +241,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: github-hosted-png
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: comparison-png
           path: results/v1/
       - run: ls -la results/v1/
       - name: Publish
