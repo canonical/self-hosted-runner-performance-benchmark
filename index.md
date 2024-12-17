@@ -8,7 +8,8 @@ tests that are executed, a speedtest using
 from Charmhub.
 
 For each type of runner below, there are two rows of charts. The first row shows the speed test
-and the second row shows the Charmhub resource download result.
+and the second row shows the Charmhub resource download result. Each point on the chart
+represents a result at a given time. All tests are point in time so not continuous.
 
 For the speedtest row, the first chart for the speedtest is the ping in milliseconds and the
 second chart shows the jitter also in milliseconds. The third chart shows the download and upload
@@ -18,6 +19,9 @@ For the Charmhub resource download row, the chart shows the minimum, mean and ma
 time in seconds for a resource from Charmhub. This chart should be compared over time as
 variations in how long resources take to download has an impact on the consistency of job
 execution.
+
+Following the results for each type of runner, a comparison between AMD64 self-hosted and GitHub
+hosted is shown. Favourable comparisons are marked as green and unfavourable as red.
 
 ## Self Hosted AMD64
 
@@ -36,3 +40,7 @@ execution.
 ![GitHub Hosted](results/v1/github-hosted.png "GitHub Hosted")
 
 [CSV results](results/v1/github-hosted.csv)
+
+## Comparison
+
+![Comparison](results/v1/comparison.png "Comparison")
