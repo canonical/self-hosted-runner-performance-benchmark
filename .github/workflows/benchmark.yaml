@@ -8,12 +8,15 @@ on:
         type: string
         description: The architecture to use, either x64, amd64 or arm64
         default: ''
+      run-name:
+        type: string
+        description: The name to use for the run
 
 jobs:
   run:
     runs-on: ${{ inputs.runs-on-hosted == 'self-hosted' && fromJson(format('[''{0}'', ''{1}'']', inputs.runs-on-hosted, inputs.runs-on-architecture)) || inputs.runs-on-hosted }}
     env:
-      RUN_NAME: ${{ format('{0}-{1}', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
+      RUN_NAME: ${{ inputs.run-name }}
     steps:
       - run: sudo apt-get update
         if: ${{ always() && !cancelled() }}
@@ -141,13 +144,13 @@ jobs:
       - name: Upload csv
         uses: actions/upload-artifact@v4
         with:
-          name: result-csv
-          path: ${{ format('results/v1/{0}-{1}.csv', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
+          name: ${{ format('{0}-csv', inputs.run-name) }}
+          path: ${{ format('results/v1/{0}.csv', inputs.run-name) }}
       - name: Upload png
         uses: actions/upload-artifact@v4
         with:
-          name: result-png
-          path: ${{ format('results/v1/{0}-{1}.png', inputs.runs-on-hosted, inputs.runs-on-architecture) }}
+          name: ${{ format('{0}-png', inputs.run-name) }}
+          path: ${{ format('results/v1/{0}.csv', inputs.run-name) }}
       # - name: Publish
       #   if: ${{ always() && !cancelled() }}
       #   uses: peaceiris/actions-gh-pages@v4
