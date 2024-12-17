@@ -123,9 +123,9 @@ jobs:
           plt.subplot(2, 1, 2)
           plt.plot(my_data["time"], my_data["max (s)"], label="max")
           plt.plot(my_data["time"], my_data["charmhub resource download mean (s)"], label="mean")
-          plt.plot(my_data["time"], my_data["min (s)"], label = "min")
+          plt.plot(my_data["time"], my_data["min (s)"], label="min")
           plt.legend()
-          plt.title("Charmhub Resource Download Mean")
+          plt.title("Charmhub Resource Download")
           plt.xlabel("Time")
           plt.ylabel("Seconds")
 
