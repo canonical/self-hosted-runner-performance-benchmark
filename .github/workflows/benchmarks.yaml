@@ -11,18 +11,18 @@ jobs:
     with:
       runs-on-hosted: self-hosted
       runs-on-architecture: arm64
-      name: self-hosted-arm
+      run-name: self-hosted-arm
   benchmark-self-hosted-amd64:
     uses: ./.github/workflows/benchmark.yaml
     with:
       runs-on-hosted: self-hosted
       runs-on-architecture: amd64
-      name: self-hosted-amd
+      run-name: self-hosted-amd
   benchmark-github-hosted:
     uses: ./.github/workflows/benchmark.yaml
     with:
       runs-on-hosted: ubuntu-latest
-      name: github-hosted
+      run-name: github-hosted
   publish:
     runs-on: self-hosted, amd64
     needs:
