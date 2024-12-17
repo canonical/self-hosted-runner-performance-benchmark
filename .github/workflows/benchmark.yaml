@@ -150,4 +150,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ format('{0}-png', inputs.run-name) }}
-          path: ${{ format('results/v1/{0}.csv', inputs.run-name) }}
+          path: ${{ format('results/v1/{0}.png', inputs.run-name) }}

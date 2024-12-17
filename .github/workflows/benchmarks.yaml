@@ -33,27 +33,27 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: self-hosted-arm-csv
-          path: results/v1/self-hosted-arm.csv
+          path: results/v1/
       - uses: actions/download-artifact@v4
         with:
           name: self-hosted-arm-png
-          path: results/v1/self-hosted-arm.png
+          path: results/v1/
       - uses: actions/download-artifact@v4
         with:
           name: self-hosted-amd-csv
-          path: results/v1/self-hosted-amd.csv
+          path: results/v1/
       - uses: actions/download-artifact@v4
         with:
           name: self-hosted-amd-png
-          path: results/v1/self-hosted-amd.png
+          path: results/v1/
       - uses: actions/download-artifact@v4
         with:
           name: github-hosted-csv
-          path: results/v1/github-hosted.csv
+          path: results/v1/
       - uses: actions/download-artifact@v4
         with:
           name: github-hosted-png
-          path: results/v1/github-hosted.png
+          path: results/v1/
       - run: ls -la results/v1/
       - name: Publish
         if: ${{ always() && !cancelled() }}
