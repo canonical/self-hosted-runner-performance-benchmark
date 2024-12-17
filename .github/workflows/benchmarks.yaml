@@ -1,0 +1,63 @@
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: "0 */2 * * *" # 12 times per day
+
+jobs:
+  benchmark-self-hosted-arm64:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: self-hosted
+      runs-on-architecture: arm64
+      run-name: self-hosted-arm
+  benchmark-self-hosted-amd64:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: self-hosted
+      runs-on-architecture: amd64
+      run-name: self-hosted-amd
+  benchmark-github-hosted:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: ubuntu-latest
+      run-name: github-hosted
+  publish:
+    runs-on: [self-hosted, amd64]
+    needs:
+      - benchmark-self-hosted-arm64
+      - benchmark-self-hosted-amd64
+      - benchmark-github-hosted
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: self-hosted-arm-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: self-hosted-arm-png
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: self-hosted-amd-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: self-hosted-amd-png
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-hosted-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-hosted-png
+          path: results/v1/
+      - run: ls -la results/v1/
+      - name: Publish
+        if: ${{ always() && !cancelled() }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
