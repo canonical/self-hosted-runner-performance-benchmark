@@ -44,7 +44,7 @@ jobs:
           export CHARMHUB_REGISTRY_PASSWORD=($(jq -r '.Password' image_location.json))
           sudo apt-get -y install skopeo
           sudo skopeo login registry.jujucharms.com -u $CHARMHUB_REGISTRY_USERNAME -p $CHARMHUB_REGISTRY_PASSWORD
-          for ((i=0; i<1; i++)); do
+          for ((i=0; i<5; i++)); do
             /usr/bin/time -o temp_time.txt -f %e sudo skopeo copy docker://$INDICO_IMAGE_NAME docker-archive:./indico_image.tar
             cat temp_time.txt >> time.txt
             rm -f ./indico_image.tar temp_time.txt
