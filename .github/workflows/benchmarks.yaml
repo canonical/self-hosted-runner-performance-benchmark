@@ -24,6 +24,7 @@ jobs:
       runs-on-hosted: ubuntu-latest
       name: github-hosted
   publish:
+    runs-on: self-hosted, amd64
     needs:
       - benchmark-self-hosted-arm64
       - benchmark-self-hosted-amd64
