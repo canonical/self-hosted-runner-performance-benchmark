@@ -108,14 +108,14 @@ jobs:
           plt.title("Network Speed Test Ping")
           plt.xlabel("time")
           plt.ylabel("milliseconds")
-          plt.xticks(rotation=90)
+          plt.xticks(rotation=30)
 
           plt.subplot(2, 3, 2)
           plt.plot(my_data["time"], my_data["jitter (s)"])
           plt.title("Jitter")
           plt.xlabel("time")
           plt.ylabel("milliseconds")
-          plt.xticks(rotation=90)
+          plt.xticks(rotation=30)
 
           plt.subplot(2, 3, 3)
           plt.plot(my_data["time"], my_data["upload (bit/s)"], label="upload")
@@ -124,7 +124,7 @@ jobs:
           plt.title("Speed")
           plt.xlabel("time")
           plt.ylabel("MBit/s")
-          plt.xticks(rotation=90)
+          plt.xticks(rotation=30)
 
           plt.subplot(2, 1, 2)
           plt.plot(my_data["time"], my_data["max (s)"], label="max")
