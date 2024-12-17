@@ -55,3 +55,9 @@ jobs:
           name: github-hosted-png
           path: results/v1/github-hosted.png
       - run: ls -la results/v1/
+      - name: Publish
+        if: ${{ always() && !cancelled() }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
