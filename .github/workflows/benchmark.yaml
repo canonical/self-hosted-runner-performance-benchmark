@@ -61,7 +61,7 @@ jobs:
           echo "max=$(cat max_time.txt)" >> $GITHUB_OUTPUT
           rm time.txt mean_time.txt min_time.txt max_time.txt
       - name: Checkout GitHub pages
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: ${{ always() && !cancelled() }}
         with:
           ref: gh-pages
