@@ -30,11 +30,11 @@ jobs:
       - benchmark-self-hosted-amd64
       - benchmark-github-hosted
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: self-hosted-amd-csv
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: github-hosted-csv
           path: results/v1/
@@ -206,7 +206,7 @@ jobs:
           rm -rf .venv
           rm create_chart.py
       - name: Upload png
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: comparison-png
           path: results/v1/comparison.png
@@ -218,31 +218,31 @@ jobs:
       - benchmark-github-hosted
       - comparison
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: self-hosted-arm-csv
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: self-hosted-arm-png
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: self-hosted-amd-csv
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: self-hosted-amd-png
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: github-hosted-csv
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: github-hosted-png
           path: results/v1/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: comparison-png
           path: results/v1/
