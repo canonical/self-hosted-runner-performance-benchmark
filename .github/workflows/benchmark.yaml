@@ -145,12 +145,12 @@ jobs:
           rm -rf .venv
           rm create_chart.py
       - name: Upload csv
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ format('{0}-csv', inputs.run-name) }}
           path: ${{ format('results/v1/{0}.csv', inputs.run-name) }}
       - name: Upload png
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ format('{0}-png', inputs.run-name) }}
           path: ${{ format('results/v1/{0}.png', inputs.run-name) }}
