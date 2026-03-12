@@ -18,6 +18,18 @@ jobs:
       runs-on-hosted: self-hosted
       runs-on-architecture: amd64
       run-name: self-hosted-amd
+  benchmark-self-hosted-s390x:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: self-hosted
+      runs-on-architecture: s390x
+      run-name: self-hosted-s390x
+  benchmark-self-hosted-ppc64el:
+    uses: ./.github/workflows/benchmark.yaml
+    with:
+      runs-on-hosted: self-hosted
+      runs-on-architecture: ppc64el
+      run-name: self-hosted-ppc64el
   benchmark-github-hosted:
     uses: ./.github/workflows/benchmark.yaml
     with:
@@ -215,6 +227,8 @@ jobs:
     needs:
       - benchmark-self-hosted-arm64
       - benchmark-self-hosted-amd64
+      - benchmark-self-hosted-s390x
+      - benchmark-self-hosted-ppc64el
       - benchmark-github-hosted
       - comparison
     steps:
@@ -233,6 +247,22 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: self-hosted-amd-png
+          path: results/v1/
+      - uses: actions/download-artifact@v7
+        with:
+          name: self-hosted-s390x-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v7
+        with:
+          name: self-hosted-s390x-png
+          path: results/v1/
+      - uses: actions/download-artifact@v7
+        with:
+          name: self-hosted-ppc64el-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v7
+        with:
+          name: self-hosted-ppc64el-png
           path: results/v1/
       - uses: actions/download-artifact@v7
         with:
