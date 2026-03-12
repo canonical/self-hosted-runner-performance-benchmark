@@ -7,7 +7,7 @@ on:
       runs-on-architecture:
         type: string
         description: The architecture to use, either x64, amd64 or arm64
-        default: ''
+        default: ""
       run-name:
         type: string
         description: The name to use for the run
@@ -88,7 +88,7 @@ jobs:
           sudo apt install -y python3-venv
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install matplotlib pandas
+          pip install matplotlib pandas pytz
           echo '
           import datetime
           import os
