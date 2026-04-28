@@ -26,15 +26,14 @@ jobs:
         run: |
           for ((i=0; i<3; i++)); do
             docker rmi ubuntu:24.04 2>/dev/null || true
-            docker image prune -f
+            docker image prune -a -f
+            docker builder prune -a -f
             /usr/bin/time -o temp_time.txt -f %e docker pull ubuntu:24.04
             cat temp_time.txt >> time.txt
             rm -f temp_time.txt
           done
           sleep 1
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'mean_time.txt').write_text(str(statistics.mean(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'min_time.txt').write_text(str(min(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
-          python3 -c "import pathlib; import statistics; (pathlib.Path() / 'max_time.txt').write_text(str(max(map(float, (pathlib.Path() / 'time.txt').read_text().splitlines()))))"
+          python3 -c "import pathlib, statistics; base = pathlib.Path(); values = [float(line) for line in (base / 'time.txt').read_text().splitlines()]; (base / 'mean_time.txt').write_text(str(statistics.mean(values))); (base / 'min_time.txt').write_text(str(min(values))); (base / 'max_time.txt').write_text(str(max(values)))"
           cat mean_time.txt
           cat min_time.txt
           cat max_time.txt
