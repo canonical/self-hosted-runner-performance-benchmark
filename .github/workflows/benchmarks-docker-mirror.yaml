@@ -32,6 +32,7 @@ jobs:
 
   publish:
     runs-on: [self-hosted, amd64]
+    if: always()
     needs:
       - benchmark-ps6-arm64
       - benchmark-ps7-amd64
@@ -39,34 +40,42 @@ jobs:
       - benchmark-github-hosted
     steps:
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps6-arm64.result == 'success' }}
         with:
           name: docker-mirror-ps6-arm64-csv
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps6-arm64.result == 'success' }}
         with:
           name: docker-mirror-ps6-arm64-png
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-amd64.result == 'success' }}
         with:
           name: docker-mirror-ps7-amd64-csv
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-amd64.result == 'success' }}
         with:
           name: docker-mirror-ps7-amd64-png
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-arm64.result == 'success' }}
         with:
           name: docker-mirror-ps7-arm64-csv
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-arm64.result == 'success' }}
         with:
           name: docker-mirror-ps7-arm64-png
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-github-hosted.result == 'success' }}
         with:
           name: docker-mirror-github-hosted-csv
           path: results/v1/
       - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-github-hosted.result == 'success' }}
         with:
           name: docker-mirror-github-hosted-png
           path: results/v1/
