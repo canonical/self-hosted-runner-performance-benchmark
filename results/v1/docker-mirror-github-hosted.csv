@@ -1,0 +1,2 @@
+time,docker mirror pull mean (s),docker mirror pull min (s),docker mirror pull max (s),
+2026-04-28T04:02:03+0000,2.5966666666666667,2.41,2.79,
