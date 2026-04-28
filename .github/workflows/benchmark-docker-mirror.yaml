@@ -25,7 +25,8 @@ jobs:
         id: docker-mirror-pull
         run: |
           for ((i=0; i<3; i++)); do
-            docker rmi ubuntu:24.04 || true
+            docker rmi ubuntu:24.04 2>/dev/null || true
+            docker image prune -f
             /usr/bin/time -o temp_time.txt -f %e docker pull ubuntu:24.04
             cat temp_time.txt >> time.txt
             rm -f temp_time.txt
@@ -69,7 +70,7 @@ jobs:
           sudo apt install -y python3-venv
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install matplotlib pandas
+          pip install matplotlib pandas pytz
           echo '
           import datetime
           import os
