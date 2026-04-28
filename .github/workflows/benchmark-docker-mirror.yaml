@@ -70,14 +70,13 @@ jobs:
           sudo apt install -y python3-venv
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install matplotlib pandas pytz
+          pip install matplotlib pandas
           echo '
           import datetime
           import os
 
           from matplotlib import pyplot as plt
           import pandas as pd
-          import pytz
 
           run_name = os.getenv("RUN_NAME")
 
@@ -86,7 +85,7 @@ jobs:
           my_data = my_data[
               my_data.time
               >= pd.to_datetime(
-                  datetime.datetime.now().replace(tzinfo=pytz.UTC) - datetime.timedelta(days=7)
+                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
               )
           ]
 
