@@ -79,7 +79,7 @@ jobs:
         with:
           name: docker-mirror-github-hosted-png
           path: results/v1/
-      - run: ls -la results/v1/
+      - run: ls -la results/v1/ || echo "No results downloaded (all runners may be offline)"
       - name: Publish
         if: ${{ always() && !cancelled() }}
         uses: peaceiris/actions-gh-pages@v4

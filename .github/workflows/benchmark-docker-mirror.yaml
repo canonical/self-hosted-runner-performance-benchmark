@@ -56,7 +56,7 @@ jobs:
           test -f results/v1/$RUN_NAME.csv || echo "time,docker mirror pull mean (s),docker mirror pull min (s),docker mirror pull max (s)," > results/v1/$RUN_NAME.csv
 
       - name: Write results
-        if: ${{ always() && !cancelled() }}
+        if: ${{ always() && !cancelled() && steps.docker-mirror-pull.conclusion == 'success' }}
         env:
           DOCKER_MIRROR_PULL_MEAN: ${{ steps.docker-mirror-pull.outputs.mean }}
           DOCKER_MIRROR_PULL_MIN: ${{ steps.docker-mirror-pull.outputs.min }}
