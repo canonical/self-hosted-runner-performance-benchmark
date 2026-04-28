@@ -95,13 +95,12 @@ jobs:
 
           from matplotlib import pyplot as plt
           import pandas as pd
-          import pytz
 
           run_name = os.getenv("RUN_NAME")
 
           my_data = pd.read_csv(f"results/v1/{run_name}.csv")
           my_data["time"] = pd.to_datetime(my_data["time"])
-          my_data = my_data[my_data.time >= pd.to_datetime(datetime.datetime.now().replace(tzinfo=pytz.UTC) - datetime.timedelta(days=7))]
+          my_data = my_data[my_data.time >= pd.to_datetime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7))]
 
           plt.subplot(2, 3, 1)
           plt.plot(my_data["time"], my_data["network speed test ping (s)"])

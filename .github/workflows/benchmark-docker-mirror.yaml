@@ -1,0 +1,120 @@
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        type: string
+        description: >-
+          JSON-encoded runner label(s). Use a JSON array for self-hosted runners,
+          e.g. '["self-hosted","amd64","self-hosted-linux-amd64-noble-large"]',
+          or a JSON string for GitHub-hosted, e.g. '"ubuntu-latest"'.
+      run-name:
+        type: string
+        description: Stem used for the CSV and PNG filenames on gh-pages, e.g. docker-mirror-ps7-amd64
+
+jobs:
+  run:
+    runs-on: ${{ fromJson(inputs.runs-on) }}
+    env:
+      RUN_NAME: ${{ inputs.run-name }}
+    steps:
+      - run: sudo apt-get update
+        if: ${{ always() && !cancelled() }}
+
+      - name: Docker mirror pull test
+        if: ${{ always() && !cancelled() }}
+        id: docker-mirror-pull
+        run: |
+          for ((i=0; i<3; i++)); do
+            docker rmi ubuntu:24.04 2>/dev/null || true
+            docker image prune -a -f
+            docker builder prune -a -f
+            /usr/bin/time -o temp_time.txt -f %e docker pull ubuntu:24.04
+            cat temp_time.txt >> time.txt
+            rm -f temp_time.txt
+          done
+          sleep 1
+          python3 -c "import pathlib, statistics; base = pathlib.Path(); values = [float(line) for line in (base / 'time.txt').read_text().splitlines()]; (base / 'mean_time.txt').write_text(str(statistics.mean(values))); (base / 'min_time.txt').write_text(str(min(values))); (base / 'max_time.txt').write_text(str(max(values)))"
+          cat mean_time.txt
+          cat min_time.txt
+          cat max_time.txt
+          echo "mean=$(cat mean_time.txt)" >> $GITHUB_OUTPUT
+          echo "min=$(cat min_time.txt)" >> $GITHUB_OUTPUT
+          echo "max=$(cat max_time.txt)" >> $GITHUB_OUTPUT
+          rm time.txt mean_time.txt min_time.txt max_time.txt
+
+      - name: Checkout GitHub pages
+        uses: actions/checkout@v6
+        if: ${{ always() && !cancelled() }}
+        with:
+          ref: gh-pages
+
+      - name: Prepare dir
+        if: ${{ always() && !cancelled() }}
+        run: |
+          mkdir -p results/v1/
+          test -f results/v1/$RUN_NAME.csv || echo "time,docker mirror pull mean (s),docker mirror pull min (s),docker mirror pull max (s)," > results/v1/$RUN_NAME.csv
+
+      - name: Write results
+        if: ${{ always() && !cancelled() && steps.docker-mirror-pull.conclusion == 'success' }}
+        env:
+          DOCKER_MIRROR_PULL_MEAN: ${{ steps.docker-mirror-pull.outputs.mean }}
+          DOCKER_MIRROR_PULL_MIN: ${{ steps.docker-mirror-pull.outputs.min }}
+          DOCKER_MIRROR_PULL_MAX: ${{ steps.docker-mirror-pull.outputs.max }}
+        run: |
+          echo $(TZ=UTC date +"%Y-%m-%dT%H:%M:%S%z"),$DOCKER_MIRROR_PULL_MEAN,$DOCKER_MIRROR_PULL_MIN,$DOCKER_MIRROR_PULL_MAX, >> results/v1/$RUN_NAME.csv
+
+      - name: Create charts
+        if: ${{ always() && !cancelled() }}
+        run: |
+          sudo apt install -y python3-venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install matplotlib pandas
+          echo '
+          import datetime
+          import os
+
+          from matplotlib import pyplot as plt
+          import pandas as pd
+
+          run_name = os.getenv("RUN_NAME")
+
+          my_data = pd.read_csv(f"results/v1/{run_name}.csv")
+          my_data["time"] = pd.to_datetime(my_data["time"])
+          my_data = my_data[
+              my_data.time
+              >= pd.to_datetime(
+                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+              )
+          ]
+
+          plt.plot(my_data["time"], my_data["docker mirror pull max (s)"], label="max")
+          plt.plot(my_data["time"], my_data["docker mirror pull mean (s)"], label="mean")
+          plt.plot(my_data["time"], my_data["docker mirror pull min (s)"], label="min")
+          plt.legend()
+          plt.title("Docker Mirror Pull Time")
+          plt.xlabel("time")
+          plt.ylabel("seconds")
+          plt.xticks(rotation=30)
+
+          fig = plt.gcf()
+          fig.set_figwidth(1.5 * 16)
+          fig.set_figheight(1.5 * 9)
+          plt.savefig(f"results/v1/{run_name}.png")
+          ' > create_chart.py
+          python create_chart.py
+          deactivate
+          rm -rf .venv
+          rm create_chart.py
+
+      - name: Upload csv
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ format('{0}-csv', inputs.run-name) }}
+          path: ${{ format('results/v1/{0}.csv', inputs.run-name) }}
+
+      - name: Upload png
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ format('{0}-png', inputs.run-name) }}
+          path: ${{ format('results/v1/{0}.png', inputs.run-name) }}

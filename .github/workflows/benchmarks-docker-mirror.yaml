@@ -1,0 +1,90 @@
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: "0 */6 * * *"
+
+jobs:
+  benchmark-ps6-arm64:
+    uses: ./.github/workflows/benchmark-docker-mirror.yaml
+    with:
+      runs-on: '["self-hosted","arm64","self-hosted-linux-arm64-noble-large"]'
+      run-name: docker-mirror-ps6-arm64
+
+  benchmark-ps7-amd64:
+    uses: ./.github/workflows/benchmark-docker-mirror.yaml
+    with:
+      runs-on: '["self-hosted","amd64","self-hosted-linux-amd64-noble-large"]'
+      run-name: docker-mirror-ps7-amd64
+
+  benchmark-ps7-arm64:
+    uses: ./.github/workflows/benchmark-docker-mirror.yaml
+    with:
+      runs-on: '["self-hosted","arm64","self-hosted-linux-arm64-noble-large","reactive"]'
+      run-name: docker-mirror-ps7-arm64
+
+  benchmark-github-hosted:
+    uses: ./.github/workflows/benchmark-docker-mirror.yaml
+    with:
+      runs-on: '"ubuntu-latest"'
+      run-name: docker-mirror-github-hosted
+
+  publish:
+    runs-on: [self-hosted, amd64]
+    if: always()
+    needs:
+      - benchmark-ps6-arm64
+      - benchmark-ps7-amd64
+      - benchmark-ps7-arm64
+      - benchmark-github-hosted
+    steps:
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps6-arm64.result == 'success' }}
+        with:
+          name: docker-mirror-ps6-arm64-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps6-arm64.result == 'success' }}
+        with:
+          name: docker-mirror-ps6-arm64-png
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-amd64.result == 'success' }}
+        with:
+          name: docker-mirror-ps7-amd64-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-amd64.result == 'success' }}
+        with:
+          name: docker-mirror-ps7-amd64-png
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-arm64.result == 'success' }}
+        with:
+          name: docker-mirror-ps7-arm64-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-ps7-arm64.result == 'success' }}
+        with:
+          name: docker-mirror-ps7-arm64-png
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-github-hosted.result == 'success' }}
+        with:
+          name: docker-mirror-github-hosted-csv
+          path: results/v1/
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.benchmark-github-hosted.result == 'success' }}
+        with:
+          name: docker-mirror-github-hosted-png
+          path: results/v1/
+      - run: ls -la results/v1/ || echo "No results downloaded (all runners may be offline)"
+      - name: Publish
+        if: ${{ always() && !cancelled() }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          keep_files: true
+          enable_jekyll: true
