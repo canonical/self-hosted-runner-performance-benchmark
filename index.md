@@ -2,10 +2,11 @@
 
 This page shows performance benchmarks comparing the GitHub and self-hosted runners.
 
-The tests run periodically throughout the day and test the networking performance. There are 2
-tests that are executed, a speedtest using
+The network benchmarks run periodically throughout the day and test networking performance. These
+benchmarks include a speedtest using
 [librespeed-cli](https://github.com/librespeed/speedtest-cli) and a download test of a resource
-from Charmhub.
+from Charmhub. This page also includes a separate Docker registry mirror pull benchmark section
+below.
 
 ## Self vs GitHub Hosted Performance
 
@@ -31,9 +32,9 @@ For each type of runner below, there are two rows of charts. The first row shows
 and the second row shows the Charmhub resource download result. Each point on the chart
 represents a result at a given time. All tests are point in time so not continuous.
 
-For the speedtest row, the first chart for the speedtest is the ping in milliseconds and the
-second chart shows the jitter also in milliseconds. The third chart shows the download and upload
-speed in MBit/s. These charts show the health of the networking.
+For the speedtest row, the first chart for the speedtest is the ping in seconds and the
+second chart shows the jitter also in seconds. The third chart shows the download and upload
+speed in bit/s. These charts show the health of the networking.
 
 For the Charmhub resource download row, the chart shows the minimum, mean and maximum download
 time in seconds for a resource from Charmhub. This chart should be compared over time as
