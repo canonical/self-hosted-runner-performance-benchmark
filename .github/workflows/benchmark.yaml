@@ -69,7 +69,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p results/v1/
-          test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (s),upload (bit/s),download (bit/s),charmhub resource download mean (s),min (s),max (s)," > results/v1/$RUN_NAME.csv
+          test -f results/v1/$RUN_NAME.csv || echo "time,network speed test ping (s),jitter (ms),upload (bit/s),download (bit/s),charmhub resource download mean (s),min (s),max (s)," > results/v1/$RUN_NAME.csv
       - name: Write results
         if: ${{ always() && !cancelled() }}
         env:
@@ -99,6 +99,7 @@ jobs:
           run_name = os.getenv("RUN_NAME")
 
           my_data = pd.read_csv(f"results/v1/{run_name}.csv")
+          my_data = my_data.rename(columns={"jitter (s)": "jitter (ms)"})
           my_data["time"] = pd.to_datetime(my_data["time"])
           my_data = my_data[my_data.time >= pd.to_datetime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7))]
 
@@ -110,7 +111,7 @@ jobs:
           plt.xticks(rotation=30)
 
           plt.subplot(2, 3, 2)
-          plt.plot(my_data["time"], my_data["jitter (s)"])
+          plt.plot(my_data["time"], my_data["jitter (ms)"])
           plt.title("Jitter")
           plt.xlabel("time")
           plt.ylabel("milliseconds")

@@ -39,6 +39,12 @@ jobs:
       - benchmark-ps7-arm64
       - benchmark-github-hosted
     steps:
+      - name: Checkout index.md from main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          sparse-checkout: index.md
+          sparse-checkout-cone-mode: false
       - uses: actions/download-artifact@v8
         if: ${{ needs.benchmark-ps6-arm64.result == 'success' }}
         with:
