@@ -33,7 +33,7 @@ and the second row shows the Charmhub resource download result. Each point on th
 represents a result at a given time. All tests are point in time so not continuous.
 
 For the speedtest row, the first chart for the speedtest is the ping in seconds and the
-second chart shows the jitter also in seconds. The third chart shows the download and upload
+second chart shows the jitter in milliseconds. The third chart shows the download and upload
 speed in bit/s. These charts show the health of the networking.
 
 For the Charmhub resource download row, the chart shows the minimum, mean and maximum download
