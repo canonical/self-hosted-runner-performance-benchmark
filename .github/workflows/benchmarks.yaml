@@ -217,6 +217,12 @@ jobs:
       - benchmark-github-hosted
       - comparison
     steps:
+      - name: Checkout index.md from main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          sparse-checkout: index.md
+          sparse-checkout-cone-mode: false
       - uses: actions/download-artifact@v8
         with:
           name: self-hosted-arm-csv
