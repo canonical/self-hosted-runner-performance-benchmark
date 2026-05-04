@@ -63,7 +63,7 @@ jobs:
 
           github_hosted_data = pd.read_csv("results/v1/github-hosted.csv")
           github_hosted_data = github_hosted_data.rename(columns={"jitter (s)": "jitter (ms)"})
-          github_hosted_data["time"] = pd.to_datetime(self_hosted_data["time"])
+          github_hosted_data["time"] = pd.to_datetime(github_hosted_data["time"])
           github_hosted_data = github_hosted_data[
               github_hosted_data.time
               >= pd.to_datetime(
