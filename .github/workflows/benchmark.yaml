@@ -101,7 +101,7 @@ jobs:
           my_data = pd.read_csv(f"results/v1/{run_name}.csv")
           my_data = my_data.rename(columns={"jitter (s)": "jitter (ms)"})
           my_data["time"] = pd.to_datetime(my_data["time"])
-          my_data = my_data[my_data.time >= pd.to_datetime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7))]
+          my_data = my_data[my_data.time >= pd.to_datetime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30))]
 
           plt.subplot(2, 3, 1)
           plt.plot(my_data["time"], my_data["network speed test ping (s)"])
