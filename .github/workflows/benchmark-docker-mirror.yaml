@@ -84,7 +84,7 @@ jobs:
           my_data = my_data[
               my_data.time
               >= pd.to_datetime(
-                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)
               )
           ]
 

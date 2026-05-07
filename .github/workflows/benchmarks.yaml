@@ -57,7 +57,7 @@ jobs:
           self_hosted_data = self_hosted_data[
               self_hosted_data.time
               >= pd.to_datetime(
-                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)
               )
           ]
 
@@ -67,7 +67,7 @@ jobs:
           github_hosted_data = github_hosted_data[
               github_hosted_data.time
               >= pd.to_datetime(
-                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+                  datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)
               )
           ]
 
